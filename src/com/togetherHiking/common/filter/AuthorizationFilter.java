@@ -11,13 +11,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.togetherHiking.board.controller.BoardController;
-import com.togetherHiking.board.model.dto.Board;
+import com.togetherHiking.board.model.service.BoardService;
 import com.togetherHiking.common.code.ErrorCode;
 import com.togetherHiking.common.code.member.MemberGrade;
 import com.togetherHiking.common.exception.HandleableException;
 import com.togetherHiking.member.model.dto.Member;
+import com.togetherHiking.member.model.service.MemberService;
 import com.togetherHiking.schedule.model.dto.Schedule;
+import com.togetherHiking.schedule.model.service.ScheduleService;
 
 /**
  * Servlet Filter implementation class AuthorizationFilter
@@ -105,6 +106,9 @@ public class AuthorizationFilter implements Filter {
 				case "board":
 					boardAuthorize(httpRequest, httpResponse, uriArr);
 					break;
+				case "reply":
+					replyAuthorize(httpRequest, httpResponse, uriArr);
+					break;
 				case "schedule":
 					scheduleAuthorize(httpRequest, httpResponse, uriArr);
 					break;
@@ -114,6 +118,29 @@ public class AuthorizationFilter implements Filter {
 		}
 		
 		chain.doFilter(request, response);
+	}
+
+	private void replyAuthorize(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String[] uriArr) {
+		Member member = (Member) httpRequest.getSession().getAttribute("authentication");
+		
+		switch (uriArr[2]) {
+		case "add-reply":
+			if(member == null) {
+				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
+			}
+			break;
+		case "delete-reply":
+			if(member == null) {
+				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
+			}
+			if(authWriter(httpRequest,httpResponse,member, "reply", httpRequest.getParameter("rp_idx"))) {
+				throw new HandleableException(ErrorCode.UNMATCHED_USER_AUTH_ERROR);
+			}
+			break;
+			
+		default:
+			break;
+		}
 	}
 
 	private void scheduleAuthorize(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String[] uriArr) {
@@ -127,6 +154,11 @@ public class AuthorizationFilter implements Filter {
 			}
 			hostAuthorize(httpRequest, httpResponse);
 			break;
+		case "calendar":
+			if(httpRequest.getSession().getAttribute("authentication") == null) {
+				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
+			}
+			break;
 		//세션 인증하면 접근가능
 		case "upload":
 			if(httpRequest.getSession().getAttribute("authentication") == null) {
@@ -138,12 +170,12 @@ public class AuthorizationFilter implements Filter {
 			if(httpRequest.getSession().getAttribute("authentication") == null) {
 				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
 			}
-			scheduleHostIsSame(httpRequest,httpResponse);
+			scheduleHostIsSame(httpRequest,httpResponse,httpRequest.getParameter("scIdx"));
 		case "delete":
 			if(httpRequest.getSession().getAttribute("authentication") == null) {
 				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
 			}
-			scheduleHostIsSame(httpRequest,httpResponse);
+			scheduleHostIsSame(httpRequest,httpResponse,httpRequest.getParameter("scIdx"));
 			break;
 		default:
 			break;
@@ -152,15 +184,14 @@ public class AuthorizationFilter implements Filter {
 		
 	}
 
-	private void scheduleHostIsSame(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+	private void scheduleHostIsSame(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String scIdx) {
 		//로그인 유저 == 작성자 비교
 		Member member = (Member) httpRequest.getSession().getAttribute("authentication");
 		
-//		ScheduleController scheduleController = new ScheduleController();
-//		Schedule schedule = scheduleController.checkEditor(httpRequest.getAttribute("boardIdx"));
-//	
+		ScheduleService scheduleService = new ScheduleService();
+	
 		
-		Schedule schedule = (Schedule) httpRequest.getAttribute("schedule");
+		Schedule schedule = (Schedule) scheduleService.getScheduleDetail(scIdx).get("schedule");
 		if(!member.getUserId().equals(schedule.getUserId())) {
 			throw new HandleableException(ErrorCode.UNAUTHORIZED_PAGE);
 		}
@@ -171,7 +202,9 @@ public class AuthorizationFilter implements Filter {
 	private void hostAuthorize(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		//로그인 시 session 객체에 authentication 속성을 부여하고 value값으로 member객체 담아옴.
 		Member member = (Member) httpRequest.getSession().getAttribute("authentication");
-		if(member.getIsHost().equals("Y")){
+		MemberService memberService = new MemberService();
+		
+		if(memberService.selectMemberById(member.getUserId()).getIsHost() != 0){
 			throw new HandleableException(ErrorCode.NO_MORE_HOSTING);
 		}
 		
@@ -184,60 +217,58 @@ public class AuthorizationFilter implements Filter {
 //		board/upload : 세션이 유효한지 판단
 //		board/edit : 세션이 유효한지 판단
 //		board/delete : 세션이 유효한지 판단
-		
+		Member member = (Member) httpRequest.getSession().getAttribute("authentication");
 
 		switch (uriArr[2]) {
 		case "board-form": 
-			if(httpRequest.getSession().getAttribute("authentication") == null) {
+			if(member == null) {
 				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
 			}
 			break;
-		//로그인 유저 - upload가능
 		case "upload":
-			if(httpRequest.getSession().getAttribute("authentication") == null) {
+			if(member == null) {
 				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
 			}
 			break;
-		//로그인 유저 == 작성자 비교 후 edit요청이 들어오는 경우
-		case "edit":
-			if(httpRequest.getSession().getAttribute("authentication") == null) {
+		case "delete-board":
+			if(member == null) {
 				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
 			}
-			boardEditorIsSame(httpRequest,httpResponse);
+			if(authWriter(httpRequest,httpResponse,member, "board", httpRequest.getParameter("bd_idx"))) {
+				throw new HandleableException(ErrorCode.UNMATCHED_USER_AUTH_ERROR);
+			}
 			break;
-		case "delete":
-			if(httpRequest.getSession().getAttribute("authentication") == null) {
-				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
-			}
-			boardEditorIsSame(httpRequest,httpResponse);
+//		로그인 유저 == 작성자 비교 후 edit요청이 들어오는 경우
+//		case "edit":
+//			if(httpRequest.getSession().getAttribute("authentication") == null) {
+//				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
+//			}
+//			authBoardEditor(httpRequest,httpResponse);
+//			break;
+			
 		default:
 			break;
-		}		
-		
-		
+		}
 	}
-
-	private void boardEditorIsSame(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-
-		//로그인 유저 == 작성자 비교
-		Member member = (Member) httpRequest.getSession().getAttribute("authentication");
+	
+	private boolean authWriter(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Member member, String table, String idx) {
+		BoardService boardService = new BoardService();
+		String userId = boardService.getWriterId(table, idx);
 		
-		BoardController boardController = new BoardController();
-		Board board = (Board) httpRequest.getAttribute("board");
-		
-		if(member.getUserId() != board.getUserId()) {
-			throw new HandleableException(ErrorCode.UNAUTHORIZED_PAGE);
+		if(member.getUserId().equals(userId)) {
+			return false;
+		}else {
+			return true;
 		}
 		
-//		//유저 동일 인물 확인시 board정보를 담아 수정페이지로 보내
-//		httpRequest.setAttribute("board", board);
-//		httpRequest.getRequestDispatcher("/board/board-detail").forward(httpRequest, httpResponse);;
-
 	}
 
 	private void adminAuthorize(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String[] uriArr) {
 		Member member = (Member) httpRequest.getSession().getAttribute("authentication");
 		
+		if(member == null) {
+			throw new HandleableException(ErrorCode.UNAUTHORIZED_PAGE);
+		}
 		MemberGrade grade = MemberGrade.valueOf(member.getGrade());
 		if(!grade.ROLE.equals("admin")) {
 			throw new HandleableException(ErrorCode.UNAUTHORIZED_PAGE);
@@ -257,9 +288,21 @@ public class AuthorizationFilter implements Filter {
 				throw new HandleableException(ErrorCode.AUTHENTICATION_FAILED_ERROR);
 			}
 			break;
+		case "reset-pwd":
+			if(httpRequest.getParameter("err") == null) {
+				MemberService memberService = new MemberService();
+				String userId = httpRequest.getParameter("userId");
+				String email = httpRequest.getParameter("email");
+				Member member = memberService.selectMemberBySearching(userId,email);
+				
+				if(member == null) {
+					throw new HandleableException(ErrorCode.UNEXIST_USER_ERROR);
+				}
+				httpRequest.setAttribute("member", member);
+			}
+			break;
 		//비로그인or 세션 유효하지 않은 유저가 마이페이지 요청시
 		case "mypage":
-			//에러메시지 없이 바로 로그인 화면으로 이동
 			if(httpRequest.getSession().getAttribute("authentication") == null) {
 				throw new HandleableException(ErrorCode.REDIRECT_LOGIN_PAGE);
 			}
@@ -268,6 +311,9 @@ public class AuthorizationFilter implements Filter {
 		}
 		
 	}
+
+	
+
 
 	/**
 	 * @see Filter#init(FilterConfig)

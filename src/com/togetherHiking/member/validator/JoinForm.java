@@ -13,8 +13,11 @@ public class JoinForm {
 	
 	private String userId;
 	private String password;
+	private String confirmPassword;
 	private String email;
-	private String tell;
+	private String nickname;
+	private String info;
+	private String birth;
 	private HttpServletRequest request;	
 	private MemberService memberService = new MemberService();
 	private Map<String,String> failedAttrubute =  new HashMap<String,String>();
@@ -23,35 +26,45 @@ public class JoinForm {
 		this.request = (HttpServletRequest) request;
 		this.userId = request.getParameter("userId");
 		this.password = request.getParameter("password");
+		this.confirmPassword = request.getParameter("user_PW2");
 		this.email = request.getParameter("email");
-		this.tell = request.getParameter("tell");
+		this.nickname = request.getParameter("nickname");
+		this.info = request.getParameter("information");
+		this.birth = request.getParameter("birth");
 	}
 	
 	public boolean test() {
-		
 		boolean isFailed = false;
-		
 		//사용자 아이디가 DB에 이미 존재하는 지 확인
 		if(userId.equals("") || memberService.selectMemberById(userId) != null) {
 			failedAttrubute.put("userId",userId);
 			isFailed = true;
 		}
 		
-		//비밀번호가 영어, 숫자, 특수문자 조합의 8자리 이상의 문자열인지 확인
-		if(!Pattern.matches("(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Zㄱ-힣0-9]).{8,}", password)) {
-			failedAttrubute.put("password",password);
-			isFailed = true;
-		}
-
-		//전화번호가 숫자로만 이루어져 있는 지 확인
-		if(!Pattern.matches("\\d{9,11}", tell)) {
-			failedAttrubute.put("tell",tell);
+		//비밀번호가 영어, 숫자, 특수문자 조합의 8~15자의 문자열인지 확인
+		if(!Pattern.matches("(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Zㄱ-힣0-9]).{8,15}", password)) {
+			failedAttrubute.put("password",password); 
 			isFailed = true;
 		}
 		
+		if(!confirmPassword.equals(password) ) {
+			failedAttrubute.put("confirmPassword",confirmPassword); 
+			isFailed = true;
+		}
+		
+		//닉네임 검증 : 사용자가 입력한 닉네임이 DB에 이미 존재하는지 확인 (위 아이디 검증과 유사)
+		if(nickname.equals("") || memberService.selectMemberById(nickname) != null) {
+			failedAttrubute.put("nickname",nickname);
+			isFailed = true;
+		}
+		
+		//이메일 검증 : '@가 포함되어 있는지 + '.'(마침표)뒤에 세글자(com/net..)인지 확인
+		
+		//생년월일 검증
+		
 		if(isFailed) {
-			request.getSession().setAttribute("joinFailed", failedAttrubute);
-			request.getSession().setAttribute("joinForm", this);
+			request.getSession().setAttribute("joinValid", failedAttrubute);	//joinFailed에 검증실패한 값 저장
+			request.getSession().setAttribute("joinForm", this);	//사용자 입력 파라미터값 재사용 위함
 			return false;
 		}else {
 			request.getSession().removeAttribute("joinForm");
@@ -59,6 +72,8 @@ public class JoinForm {
 			return true;
 		}
 	}
+	
+
 
 	public String getUserId() {
 		return userId;
@@ -72,16 +87,16 @@ public class JoinForm {
 		return email;
 	}
 
-	public String getTell() {
-		return tell;
+	public String getNickname() {
+		return nickname;
 	}
 
-	
-	
-	
-	
-	
-	
-	
+	public String getInfo() {
+		return info;
+	}
+
+	public String getBirth() {
+		return birth;
+	}	
 
 }

@@ -2,18 +2,31 @@ package com.togetherHiking.schedule.model.dto;
 
 import java.sql.Date;
 
+import com.togetherHiking.mountain.model.dto.Mountain;
+
 public class Schedule {
 	
 	private String scIdx;
 	private String userId;
-	private Date meetingDate;
-	private String place;
-	private Date expDate;
-	private String plIdx;
+	private Date dDay;
+	private String mountainName;
 	private Date regDate;
-	private String info;
-	private int capacity;
+	private Date expDate;
+	private int allowedNum; //모집 인원수
+	private int remainNum; // 남은 인원수
+	private String info; //모임 상세정보
 	private String isDel;
+	private int status;
+	private String openChat;	
+	private int age; //모임 연령대
+	private String nickName;
+	private String userInfo;
+	private String mHeight;
+
+	
+	public Schedule() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public String getScIdx() {
 		return scIdx;
@@ -31,36 +44,20 @@ public class Schedule {
 		this.userId = userId;
 	}
 
-	public Date getMeetingDate() {
-		return meetingDate;
+	public Date getdDay() {
+		return dDay;
 	}
 
-	public void setMeetingDate(Date meetingDate) {
-		this.meetingDate = meetingDate;
+	public void setdDay(Date dDay) {
+		this.dDay = dDay;
 	}
 
-	public String getPlace() {
-		return place;
+	public String getMountainName() {
+		return mountainName;
 	}
 
-	public void setPlace(String place) {
-		this.place = place;
-	}
-
-	public Date getExpDate() {
-		return expDate;
-	}
-
-	public void setExpDate(Date expDate) {
-		this.expDate = expDate;
-	}
-
-	public String getPlIdx() {
-		return plIdx;
-	}
-
-	public void setPlIdx(String plIdx) {
-		this.plIdx = plIdx;
+	public void setMountainName(String mountainName) {
+		this.mountainName = mountainName;
 	}
 
 	public Date getRegDate() {
@@ -71,20 +68,36 @@ public class Schedule {
 		this.regDate = regDate;
 	}
 
+	public Date getExpDate() {
+		return expDate;
+	}
+
+	public void setExpDate(Date expDate) {
+		this.expDate = expDate;
+	}
+
+	public int getAllowedNum() {
+		return allowedNum;
+	}
+
+	public void setAllowedNum(int allowedNum) {
+		this.allowedNum = allowedNum;
+	}
+
+	public int getRemainNum() {
+		return remainNum;
+	}
+
+	public void setRemainNum(int remainNum) {
+		this.remainNum = remainNum;
+	}
+
 	public String getInfo() {
 		return info;
 	}
 
 	public void setInfo(String info) {
 		this.info = info;
-	}
-
-	public int getCapacity() {
-		return capacity;
-	}
-
-	public void setCapacity(int capacity) {
-		this.capacity = capacity;
 	}
 
 	public String getIsDel() {
@@ -95,13 +108,65 @@ public class Schedule {
 		this.isDel = isDel;
 	}
 
-	@Override
-	public String toString() {
-		return "Schedule [scIdx=" + scIdx + ", userId=" + userId + ", meetingDate=" + meetingDate + ", place=" + place
-				+ ", expDate=" + expDate + ", plIdx=" + plIdx + ", regDate=" + regDate + ", info=" + info
-				+ ", capacity=" + capacity + ", isDel=" + isDel + "]";
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public String getOpenChat() {
+		return openChat;
+	}
+
+	public void setOpenChat(String openChat) {
+		this.openChat = openChat;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
 	}
 	
+
+	public String getNickName() {
+		return nickName;
+	}
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
 	
+	public String getUserInfo() {
+		return userInfo;
+	}
+
+	public void setUserInfo(String userInfo) {
+		this.userInfo = userInfo;
+	}
+
+	
+	public String getmHeight() {
+		return mHeight;
+	}
+
+	public void setmHeight(Mountain mountain) {
+		this.mHeight = mountain.getmHeight();
+	}
+
+
+	@Override
+	public String toString() {
+		return "Schedule [scIdx=" + scIdx + ", userId=" + userId + ", dDay=" + dDay + ", mountainName=" + mountainName
+				+ ", regDate=" + regDate + ", expDate=" + expDate + ", allowedNum=" + allowedNum + ", remainNum="
+				+ remainNum + ", info=" + info + ", isDel=" + isDel + ", status=" + status + ", openChat=" + openChat
+				+ ", age=" + age + "]";
+	}
+
+
 	
 }

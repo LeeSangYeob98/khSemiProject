@@ -2,19 +2,23 @@ package com.togetherHiking.member.model.dto;
 
 import java.sql.Date;
 
+import com.togetherHiking.common.file.FileDTO;
+
 public class Member {
 	
 	private String userId;
 	private String password;
-	private String userName;
 	private Date birth;
 	private String info;
 	private String nickname;
 	private Date joinDate;
 	private String email;
 	private String grade;
-	private String isHost;
-	private String flIdx;
+	private int isHost;
+	private int isLeave;
+	private int postCnt;
+	private int replyCnt;
+	private String profile;
 	
 	public String getUserId() {
 		return userId;
@@ -33,16 +37,6 @@ public class Member {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-
-	public String getUserName() {
-		return userName;
-	}
-
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 
@@ -105,34 +99,71 @@ public class Member {
 		this.grade = grade;
 	}
 
-
-	public String getIsHost() {
+	public int getIsHost() {
 		return isHost;
 	}
 
 
-	public void setIsHost(String isHost) {
+	public void setIsHost(int isHost) {
 		this.isHost = isHost;
 	}
 
 
-	public String getFlIdx() {
-		return flIdx;
+	public int getIsLeave() {
+		return isLeave;
 	}
 
 
-	public void setFlIdx(String flIdx) {
-		this.flIdx = flIdx;
+	public void setIsLeave(int isLeave) {
+		this.isLeave = isLeave;
+	}
+
+
+
+	public int getPostCnt() {
+		return postCnt;
+	}
+
+
+	public void setPostCnt(int postCnt) {
+		this.postCnt = postCnt;
+	}
+
+
+	public int getReplyCnt() {
+		return replyCnt;
+	}
+
+
+	public void setReplyCnt(int replyCnt) {
+		this.replyCnt = replyCnt;
+	}
+	
+	
+	public String getProfile() {
+		return profile;
+	}
+
+
+	public void setProfile(FileDTO profile) {
+		if(profile.getSavePath() == null) {
+			this.profile = null;
+		}else {
+			this.profile = profile.getSavePath() + profile.getRenameFileName();
+
+		}
 	}
 
 
 	@Override
 	public String toString() {
-		return "Member [userId=" + userId + ", password=" + password + ", userName=" + userName + ", birth=" + birth
-				+ ", info=" + info + ", nickname=" + nickname + ", joinDate=" + joinDate + ", email=" + email
-				+ ", grade=" + grade + ", isHost=" + isHost + ", flIdx=" + flIdx + "]";
+		return "Member [userId=" + userId + ", password=" + password + ", birth=" + birth + ", info=" + info
+				+ ", nickname=" + nickname + ", joinDate=" + joinDate + ", email=" + email + ", grade=" + grade
+				+ ", isHost=" + isHost + ", isLeave=" + isLeave + "]";
 	}
-	
+
+
+
 
 
 

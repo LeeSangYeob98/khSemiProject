@@ -8,7 +8,7 @@
 }
 .tit_side_menu{
   padding: 20px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
 }
 .mypage_side_menu{
@@ -28,7 +28,7 @@
   padding: 10px 0 0 15px;
   font-size: 14px;
 }
-.modify_form{
+#modify_form{
   grid-column: 4 / span 4;
   border: 1px solid #bbb;
   margin-top:50px;
@@ -44,7 +44,7 @@
 .tit_pw_label{
 	font-size:13px;
 }
-.modify_form div{
+#modify_form div{
   margin: 25px 0;
 }
 
@@ -59,6 +59,19 @@ input[type=password]{
   display: block;
   margin: 5px 0 10px 80px;
 }
+#nickname{
+	width: 240px;
+}
+#check_nick{
+	width: 60px;
+	font-size:12px;
+	border:none;
+	background-color: #ff8080;
+	padding:7px 5px;
+	border-radius: 7px;
+	color:#fff;
+}
+
 button{
   width: 100%;
   background-color: var(--point-color);
@@ -66,4 +79,15 @@ button{
   color: #fff;
   border-radius: 10px;
   margin-top: 20px;
+}
+
+.alert_auth{
+	font-size:11px;
+	color:crimson;
+	margin-left:10px;
+}
+#alert_nick, #alert_info{
+	display: block;
+	margin-left: 83px;
+	margin-top: 3px;
 }

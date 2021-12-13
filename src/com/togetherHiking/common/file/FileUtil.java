@@ -24,8 +24,6 @@ public class FileUtil {
 	
 	private static final int MAX_SIZE = 1024*1024*10;
 	
-	//multipart 요청 도착 
-	// -> multipartParser를 사용해 파일업로드 + 요청파라미터 저장 + FileDTO 생성
 	public MultiPartParams fileUpload(HttpServletRequest request){
 		
 		Map<String,List> res = new HashMap<String, List>();
@@ -39,10 +37,14 @@ public class FileUtil {
 			while((part = parser.readNextPart()) != null) {
 				if(part.isFile()) {
 					FilePart filePart = (FilePart) part;
-					FileDTO fileDTO = createFileDTO(filePart);
-					filePart.writeTo(new File(getSavePath() + fileDTO.getRenameFileName())); //파일저장
-					fileDTOs.add(fileDTO);
-				}else {
+					
+					if(filePart.getFileName() != null) {
+						FileDTO fileDTO = createFileDTO(filePart);
+						filePart.writeTo(new File(getSavePath() + fileDTO.getRenameFileName()));
+						fileDTOs.add(fileDTO);
+					}
+					
+				}else if(part.isParam()) {
 					ParamPart paramPart = (ParamPart) part;
 					setParameterMap(paramPart, res);
 				}
@@ -57,10 +59,39 @@ public class FileUtil {
 		return new MultiPartParams(res);
 	}
 	
+	public Map<String,FileDTO> profileUpload(HttpServletRequest request){
+		
+		Map<String,FileDTO> res = new HashMap<String, FileDTO>();
+		FileDTO fileDTO = new FileDTO();
+		
+		try {
+			MultipartParser parser = new MultipartParser(request, MAX_SIZE);
+			parser.setEncoding("UTF-8");
+			Part part = null;
+			
+			while((part = parser.readNextPart()) != null) {
+				if(part.isFile()) {
+					FilePart filePart = (FilePart) part;
+					fileDTO = createFileDTO(filePart);
+					filePart.writeTo(new File(getSavePath() + fileDTO.getRenameFileName())); //�뙆�씪���옣
+				}
+			}
+					
+			res.put("com.togetherHiking.files",fileDTO);
+			
+		} catch (IOException e) {
+			throw new HandleableException(ErrorCode.FAILED_FILE_UPLOAD_ERROR,e);
+		}
+		
+		return res;
+	}
+	
+
+
 	private String getSavePath() {
 		
-		//2. 저장경로를 웹어플리케이션 외부로 지정
-		//		 저장경로를  외부경로 + /연/월/일 형태로 작성
+		//2. ���옣寃쎈줈瑜� �쎒�뼱�뵆由ъ��씠�뀡 �쇅遺�濡� 吏��젙
+		//		 ���옣寃쎈줈瑜�  �쇅遺�寃쎈줈 + /�뿰/�썡/�씪 �삎�깭濡� �옉�꽦
 		String subPath = getSubPath();
 		String savePath = Config.UPLOAD_PATH.DESC + subPath;
 		
@@ -88,6 +119,7 @@ public class FileUtil {
 		fileDTO.setOriginFileName(filePart.getFileName());
 		fileDTO.setRenameFileName(renameFileName);
 		fileDTO.setSavePath(savePath);
+		
 		return fileDTO;
 	}
 	
@@ -100,22 +132,5 @@ public class FileUtil {
 			res.put(paramPart.getName(), param);
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 }

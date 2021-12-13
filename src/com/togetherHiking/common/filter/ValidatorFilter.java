@@ -15,6 +15,9 @@ import com.togetherHiking.board.validator.BoardForm;
 import com.togetherHiking.common.code.ErrorCode;
 import com.togetherHiking.common.exception.HandleableException;
 import com.togetherHiking.member.validator.JoinForm;
+import com.togetherHiking.member.validator.ModifyForm;
+import com.togetherHiking.member.validator.UpdatePwdForm;
+import com.togetherHiking.reply.validator.ReplyForm;
 import com.togetherHiking.schedule.validator.ScheduleForm;
 
 public class ValidatorFilter implements Filter {
@@ -26,7 +29,7 @@ public class ValidatorFilter implements Filter {
         // TODO Auto-generated constructor stub
     }
 
-	/**
+	/** 
 	 * @see Filter#destroy()
 	 */
 	public void destroy() {
@@ -58,7 +61,10 @@ public class ValidatorFilter implements Filter {
 				case "board":
 					redirectURI = boardValidation(httpRequest, httpResponse, uriArr);
 					break;
-				//
+				case "reply":
+					redirectURI = replyValidation(httpRequest, httpResponse, uriArr);
+					break;
+				
 				default:
 					break;
 			}
@@ -71,6 +77,23 @@ public class ValidatorFilter implements Filter {
 		chain.doFilter(request, response);
 	}
 
+	private String replyValidation(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String[] uriArr) {
+		String redirectURI = null;
+		
+		switch (uriArr[2]) {
+		case "add-reply":
+			ReplyForm replyFrom = new ReplyForm(httpRequest);
+			if(!replyFrom.test()) {
+				redirectURI = "/reply/board-detail?bd_idx=" + httpRequest.getParameter("bd_idx") + "&err=1";
+				return redirectURI;
+			}
+			break;
+		default:
+			break;
+		}
+		return redirectURI;
+	}
+
 	private String scheduleValidation(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String[] uriArr) {
 		String redirectURI = null;
 		
@@ -78,10 +101,9 @@ public class ValidatorFilter implements Filter {
 		
 		switch (uriArr[2]) {
 		case "upload":
-			if(!scheduleForm.test()) {
-				redirectURI = "/schedule/calendar";	
-			}break;
-		//edit완료 버튼
+			/*
+			 * if(!scheduleForm.test()) { redirectURI = "/schedule/calendar"; }
+			 */break;
 		case "edit":
 			if(!scheduleForm.test()) {
 				redirectURI = "/schedule/calendar";
@@ -100,16 +122,12 @@ public class ValidatorFilter implements Filter {
 		switch (uriArr[2]) {
 		case "upload":
 			BoardForm boardForm = new BoardForm(httpRequest);
-			if(!BoardForm.test()) {
-				redirectURI = "/board/detail";	
-			}break;
-		case "edit":
-			if(!BoardForm.test()) {
-				redirectURI = "/board/detail";	
-			redirectURI = null;
+			if(!boardForm.test()) {
+				redirectURI = "/board/board-form?err=1";
+				return redirectURI;
 			}
 			break;
-
+			
 		default:
 			break;
 		}
@@ -118,25 +136,36 @@ public class ValidatorFilter implements Filter {
 
 	private String memberValidation(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String[] uriArr) {
 		String redirectURI = null;
+		JoinForm joinForm = new JoinForm(httpRequest);;
+		ModifyForm modifyForm = new ModifyForm(httpRequest);
+		UpdatePwdForm updatePwdForm = new UpdatePwdForm(httpRequest);
 		
 		switch (uriArr[2]) {
-		//member/join
 		case "join":
-			JoinForm joinForm = new JoinForm(httpRequest);
-			if(!joinForm.test()) {
-				redirectURI = "/member/join-form?err=1";	//err파라미터 전달(왜? 이때만 validation출력)
+			String password = httpRequest.getParameter("password");
+			if(password == null) {
+				redirectURI = "/index";
+			}
+			
+			if(!joinForm.test()) {  
+				redirectURI = "/member/join-page?err=1";	
 			}break;
-		//가입시 이메일 인증절차 : 발송된 이메일 form에서 사이트로 돌아가는 버튼(가입완료)을 클릭하면 거쳐야하는 절차 
-		//				--> 우리가 우리사이트에서 외부로 넘어갈때 토큰(유니크한값)을 발생시켜 세션에 저장
-		//				--> 뷰단에 저장된 토큰값이 일치하는지를 비교 
+
 		case "join-impl":
-			String persistToken = httpRequest.getParameter("persist-token");	//뷰단에 저장된 토큰
-			if(!persistToken.equals(httpRequest.getSession().getAttribute("persist-token"))) {	//우리사이트에서 외부로 넘어갈때 토큰(유니크한값)을 발생시켜 세션에 저장
-				//같지않으면,
+			String persistToken = httpRequest.getParameter("persist-token");	
+			if(!persistToken.equals(httpRequest.getSession().getAttribute("persist-token"))) {	
 				throw new HandleableException(ErrorCode.AUTHENTICATION_FAILED_ERROR);
 			}
 			break;
-
+		case "update-pwd":
+			if(!updatePwdForm.test()) {
+				redirectURI = "/member/reset-pwd?err=1";
+			}
+			break;
+		case "modify":
+			if(!modifyForm.test()) {
+				redirectURI = "/member/modify-page?err=1";
+			}break;
 		default:
 			break;
 		}

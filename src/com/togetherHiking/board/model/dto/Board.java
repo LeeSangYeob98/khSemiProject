@@ -3,96 +3,86 @@ package com.togetherHiking.board.model.dto;
 import java.sql.Date;
 
 public class Board {
-
 	private String bdIdx;
 	private String userId;
+	private String nickname;
 	private String title;
-	private String category;
+	private String subject;
 	private String content;
-	private String flIdx;
 	private Date regDate;
-	private String grade;
-	private String isDel;
+	private int viewCnt;
+	private String profileSavePath;
+	private String profileRenameFileName;
 	
-
 	public String getBdIdx() {
 		return bdIdx;
 	}
-
+	
 	public void setBdIdx(String bdIdx) {
 		this.bdIdx = bdIdx;
 	}
-
+	
 	public String getUserId() {
 		return userId;
 	}
-
+	
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-
+	
+	public String getNickname() {
+		return nickname;
+	}
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
 	public String getTitle() {
 		return title;
 	}
-
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
-	public String getCategory() {
-		return category;
+	public String getSubject() {
+		return subject;
 	}
-
-	public void setCategory(String category) {
-		this.category = category;
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
-
 	public String getContent() {
 		return content;
 	}
-
 	public void setContent(String content) {
 		this.content = content;
 	}
-
-	public String getFlIdx() {
-		return flIdx;
-	}
-
-	public void setFlIdx(String flIdx) {
-		this.flIdx = flIdx;
-	}
-
 	public Date getRegDate() {
 		return regDate;
 	}
-
 	public void setRegDate(Date regDate) {
 		this.regDate = regDate;
 	}
-
-	public String getGrade() {
-		return grade;
+	public int getViewCnt() {
+		return viewCnt;
 	}
-
-	public void setGrade(String grade) {
-		this.grade = grade;
+	public void setViewCnt(int viewCnt) {
+		this.viewCnt = viewCnt;
 	}
-
-	public String getIsDel() {
-		return isDel;
+	public String getProfileSavePath() {
+		return profileSavePath;
 	}
-
-	public void setIsDel(String isDel) {
-		this.isDel = isDel;
+	public void setProfileSavePath(String profileSavePath) {
+		this.profileSavePath = profileSavePath;
 	}
-
+	public String getProfileRenameFileName() {
+		return profileRenameFileName;
+	}
+	public void setProfileRenameFileName(String profileRenameFileName) {
+		this.profileRenameFileName = profileRenameFileName;
+	}
 	@Override
 	public String toString() {
-		return "Board [bdIdx=" + bdIdx + ", userId=" + userId + ", title=" + title + ", category=" + category
-				+ ", content=" + content + ", flIdx=" + flIdx + ", regDate=" + regDate + ", grade=" + grade + ", isDel="
-				+ isDel + "]";
+		return "Board [bdIdx=" + bdIdx + ", userId=" + userId + ", nickname=" + nickname + ", title=" + title
+				+ ", subject=" + subject + ", content=" + content + ", regDate=" + regDate + ", viewCnt=" + viewCnt
+				+ ", profileSavePath=" + profileSavePath + ", profileRenameFileName=" + profileRenameFileName + "]";
 	}
-	
 	
 }
